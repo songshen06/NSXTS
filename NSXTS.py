@@ -138,7 +138,7 @@ def main():
 	print "===========Collecting NSXM info====================="
 	nsxm(nsxm_host,nsxm_user,nsxm_pass)
 	print "===========Collecting controller info==============  "
-	for nsxc_host in nsxc_hosts.split():
+	for nsxc_host in nsxc_hosts.split(','):
 		print nsxc_host
 		controller(nsxc_host,nsxc_user,nsxc_password)
 	print "===========Collecting esxi host info==============  "
