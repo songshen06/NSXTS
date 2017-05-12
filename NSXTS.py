@@ -20,6 +20,7 @@ def controller(nsxc_host,nsxc_user,nsxc_password):
 	stdin ,stdout, stderr = ssh.exec_command('show control-cluster logical-routers bridge-mac all all')
 	print stdout.read()
 	ssh.close()
+'''
 def esxi(esxi_hosts,esxi_user,esxi_password):
 	ssh = paramiko.SSHClient()
 	ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -37,6 +38,26 @@ def esxi(esxi_hosts,esxi_user,esxi_password):
 	stdin ,stdout, stderr = ssh.exec_command('/usr/lib/vmware/vm-support/bin/dump-vxlan-info.py ')
 	print stdout.read()
 	ssh.close()
+'''	
+def esxi(esxi_host,esxi_user,esxi_password):
+	ssh = paramiko.SSHClient()
+	ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+	ssh.connect(esxi_host,22,esxi_user,esxi_password)
+	ssh_conn = ssh.invoke_shell()
+	time.sleep(1)
+	ssh_conn.send('esxcli network ip connection list |grep 5671 \n')
+	time.sleep(1)
+	ssh_conn.send('esxcli network ip connection list |grep 1234 \n')
+	time.sleep(1)
+	ssh_conn.send('/usr/lib/vmware/vm-support/bin/dump-vdr-info.sh \n')
+	time.sleep(1)
+	ssh_conn.send('/usr/lib/vmware/vm-support/bin/dump-vxlan-info.py \n')
+	output = ssh_conn.recv(5000)
+	#print output 
+	f = open(esxi_host,'w+')
+	f.write(output)
+	f.close()
+	ssh.close()	
 def nsxm(nsxm_host,nsxm_user,nsxm_pass):
 	ssh = paramiko.SSHClient()
 	#ssh.load_system_host_keys()
@@ -148,7 +169,7 @@ def main():
 	
 	vni_list = GetVNIList(nsxm_host,nsxm_user,nsxm_pass)
 	print vni_list 
-	for nsxc_host in nsxc_hosts.split():
+	for nsxc_host in nsxc_hosts.split(','):
 		print "==========================%s======================" %nsxc_host
 		RouterIDList = GetRouterList(nsxc_host,nsxc_user,nsxc_password)
 		print RouterIDList
