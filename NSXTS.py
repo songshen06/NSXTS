@@ -20,25 +20,6 @@ def controller(nsxc_host,nsxc_user,nsxc_password):
 	stdin ,stdout, stderr = ssh.exec_command('show control-cluster logical-routers bridge-mac all all')
 	print stdout.read()
 	ssh.close()
-'''
-def esxi(esxi_hosts,esxi_user,esxi_password):
-	ssh = paramiko.SSHClient()
-	ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-	ssh.connect(esxi_hosts,22,esxi_user,esxi_password)
-	print "esxcli network ip connection list |grep 5671 \n"
-	stdin ,stdout, stderr = ssh.exec_command('esxcli network ip connection list |grep 5671')
-	print stdout.read()
-	print "esxcli network ip connection list |grep 1234 \n"
-	stdin ,stdout, stderr = ssh.exec_command('esxcli network ip connection list |grep 1234 ')
-	print stdout.read()
-	print "/usr/lib/vmware/vm-support/bin/dump-vdr-info.sh \n"
-	stdin ,stdout, stderr = ssh.exec_command('/usr/lib/vmware/vm-support/bin/dump-vdr-info.sh ')
-	print stdout.read()
-	print "/usr/lib/vmware/vm-support/bin/dump-vxlan-info.py \n"
-	stdin ,stdout, stderr = ssh.exec_command('/usr/lib/vmware/vm-support/bin/dump-vxlan-info.py ')
-	print stdout.read()
-	ssh.close()
-'''	
 def esxi(esxi_host,esxi_user,esxi_password):
 	ssh = paramiko.SSHClient()
 	ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -140,7 +121,8 @@ def GetRouteTable(nsxc_host,nsxc_user,nsxc_password,RouterIDList):
 		time.sleep(1)
 		print stdout.read()
 def main():	
-	script,filename = argv	
+	#script,filename = argv	
+        filename = 'info.ini'
 	config = ConfigParser()
 	config.read(filename)
 	nsxc_hosts = config.get("controller","nsxc_hosts")
