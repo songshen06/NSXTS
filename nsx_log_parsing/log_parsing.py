@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[27]:
+# In[66]:
+
+
 
 import os
 import fnmatch 
@@ -15,8 +17,7 @@ except:
 from markup import oneliner as e
 
 
-# In[28]:
-
+# In[67]:
 
 # ## define a function to get file list
 
@@ -28,6 +29,7 @@ def get_file_list(path,file_name):
         for file in fnmatch.filter(files,file_name):
             file_list.append(os.path.join(root,file))
     if not file_list:
+
         print "I didn't find %s" %file_name
     return file_list
 
@@ -176,7 +178,7 @@ def get_arp_table(vxlan_file,vds_name,vxlan_number):
 # In[45]:
 
 
-# In[29]:
+# In[68]:
 
 def get_nsx_version(path):
     file_list = []
@@ -193,11 +195,16 @@ def get_nsx_version(path):
             for line in fp:
                 if re_version.match(line):
                     version = line
-    nsx_version = version.split(':')[1]
-    return nsx_version
+                    nsx_version = version.split(':')[1]
+                    return nsx_version
 
 
-# In[30]:
+# In[ ]:
+
+
+
+
+# In[69]:
 
 def get_nsx_ip(path):
     file_list = []
@@ -222,26 +229,73 @@ def get_nsx_ip(path):
     return nsx_ip
 
 
-# In[ ]:
+# In[70]:
 
 def use_count(path):
-    f = open('/users/home10/shensong/shared/td_use_times', 'w+')
-    f.write(path+'\n')  # python will convert \n to os.linesep
-    f.close()  # you can omit in most cases as the destructor will call it
+    host_name = os.uname()[1]
+    if gss in host_name :
+        f = open('/users/home10/shensong/shared/td_use_times', 'w+')
+        f.write(path+'\n')  # python will convert \n to os.linesep
+        f.close()  # you can omit in most cases as the destructor will call it
 
 
-# In[31]:
+# In[71]:
+
+def get_vc_ip(vpxa_cfg):
+    with open(vpxa_cfg) as fp:
+            for line in fp:
+                if 'serverIp' in line:
+                    ip = re.sub('<[^>]*>', '',line)
+    return ip
+
+
+# In[72]:
+
+def get_vc_version(path):
+    file_list = []
+    for root,dirs,files in os.walk(path):
+        for file in fnmatch.filter(files,'vpxd-[0-9]*[0-9].log'):
+            file_list.append(os.path.join(root,file))
+    if len(file_list) == 0:
+        print "I didn't find vpxd log in this %s" %path
+    elif len(file_list) > 1 :
+        print "more than one vc log bundle in this %s" %path
+    else :
+        f=open(file_list[0])
+        lines=f.readlines()
+        vc_version_list = lines[0].split(',')[-3:-1]
+        vc_version = ''.join(vc_version_list)
+        vc = re.sub('=',' ',vc_version)
+        return vc    
+
+
+# In[73]:
 
 def main():
     path = os.getcwd()
-    use_count(path)
+    use_count
+    print('-' * 80) 
     NSX_Version = get_nsx_version(path)
     print 'NSX version is %s \n' %NSX_Version
     NSX_IP = get_nsx_ip(path)
     print 'NSX manager IP is %s \n' %NSX_IP
+    
+    vpxa_cfg_list = get_file_list(path,"vpxa.cfg")
+    vpxa_cfg = vpxa_cfg_list[0]
+    VC_ip = get_vc_ip(vpxa_cfg)
+    VC_version = get_vc_version(path)
+    print 'vCenter IP is  %s  \n' %VC_ip
+    print 'vCenter version is %s \n' %VC_version
+    print 'Please check product matrix \n'
+    print 'https://www.vmware.com/resources/compatibility/sim/interop_matrix.php \n'
+    
     vdr_info_list = get_file_list(path,"dump-vdr-info.sh.txt")
     vxlan_info_list = get_file_list(path,"dump-vxlan-info.py.txt")
     vmk_info_list = get_file_list(path,"esxcfg-vmknic_-l.txt")
+    ## Get VC IP from esxi bundle
+    vpxa_cfg_list = get_file_list(path,"vpxa.cfg")
+    if len(vpxa_cfg_list) > 0:
+        get_vc_ip(vpxa_cfg_list[0])
     num_file = len(vdr_info_list)
    
 
@@ -349,7 +403,7 @@ def main():
 # In[46]:
 
 
-# In[32]:
+# In[74]:
 
 if __name__ == "__main__":
     main()
